@@ -4,3 +4,7 @@ git commit -m "message here"
 
 Update branch from master
 git pull origin master	
+
+Merge to master:
+- Switch brancht master branch
+- 
