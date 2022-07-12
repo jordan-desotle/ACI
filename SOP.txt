@@ -1,0 +1,6 @@
+Send a push to master:
+git add file_name.py
+git commit -m "message here"
+
+Update branch from master
+git pull origin master
