@@ -16,6 +16,16 @@ class EllipticCurve:
 		self.p = p
 		self.a = a
 		self.b = b
+	def gen_tables():
+		for i in range (0, self.p):
+			temp_arr = []
+			for j in range(0, self.p):
+				temp_int = (i*j)%self.p
+				temp_arr.append(temp_int)
+			multiplicative_table.append(temp_arr)
+	def print_table():
+		print(multiplicative_table)
+
 
 
 # Gathers input from user
@@ -171,8 +181,10 @@ def isPrime(n):
 # Get input from user
 inp = get_inp()
 
-
 testCurve = EllipticCurve(inp[0], inp[1], inp[2])
+
+testCurve.gen_tables()
+print(testCurve.multiplicative_table)
 
 
 
