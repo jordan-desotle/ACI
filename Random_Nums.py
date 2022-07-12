@@ -10,11 +10,7 @@ blue_color="\033[0;34m"
 white_color="\033[0;37m"
 
 
-<<<<<<< HEAD
 # Represents an Elliptic Curve
-=======
-#Represents elliptic curves
->>>>>>> de43a12107b3d8d222686bc59d2ca65eeb86b045
 class EllipticCurve:
 	def __init__(self, p, a, b):
 		self.p = p
@@ -70,11 +66,7 @@ def get_inp():
 	return p, a, b
 
 
-<<<<<<< HEAD
 # Prints input
-=======
-# this function prints the input from the user
->>>>>>> de43a12107b3d8d222686bc59d2ca65eeb86b045
 def print_Inp(p, a, b):
 	p_color = red_color
 	a_color = red_color
