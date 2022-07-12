@@ -197,8 +197,8 @@ def solve_for_yy(inp):
 
 # usr_inp = inp()
 usr_inp = get_inp()
-generate_tables(usr_inp[0])
-print_tables()
+#generate_tables(usr_inp[0])
+#print_tables()
 solutions = solve_for_yy(usr_inp)
 coords = generate_coords(usr_inp[0], solutions)
 plot_points(coords, usr_inp)
