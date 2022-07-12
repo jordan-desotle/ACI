@@ -10,7 +10,7 @@ blue_color="\033[0;34m"
 white_color="\033[0;37m"
 
 
-
+# Represents an Elliptic Curve
 class EllipticCurve:
 	def __init__(self, p, a, b):
 		self.p = p
@@ -18,7 +18,7 @@ class EllipticCurve:
 		self.b = b
 
 
-
+# Gathers input from user
 def get_inp():
 	good_A = False
 	good_B = False
@@ -66,6 +66,7 @@ def get_inp():
 	return p, a, b
 
 
+# Prints input
 def print_Inp(p, a, b):
 	p_color = red_color
 	a_color = red_color
@@ -85,7 +86,7 @@ def print_Inp(p, a, b):
 
 
 
- 
+# tests large prime numbers
 def is_Prime(n):
     """
     Miller-Rabin primality test.
