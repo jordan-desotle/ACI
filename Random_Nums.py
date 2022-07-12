@@ -10,7 +10,7 @@ blue_color="\033[0;34m"
 white_color="\033[0;37m"
 
 
-
+#Represents elliptic curves
 class EllipticCurve:
 	def __init__(self, p, a, b):
 		self.p = p
