@@ -66,6 +66,7 @@ def get_inp():
 	return p, a, b
 
 
+# this function prints the input from the user
 def print_Inp(p, a, b):
 	p_color = red_color
 	a_color = red_color
