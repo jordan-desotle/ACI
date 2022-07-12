@@ -79,12 +79,15 @@ def print_Inp(p, a, b):
 	if(not (b==None)):
 		b_color = green_color	
 
-	os.system("clear")
+
+	clear()
 	print('-'*30)
 	print("{p_col}P: {p_val}\n{a_col}A: {a_val}\n{b_col}B: {b_val}{white}".format(p_val=p, a_val=a, b_val=b, p_col=p_color, a_col=a_color, b_col=b_color, white=white_color))
 	print('-'*30)
 
-
+def clear():
+	command = ('clear' if os.name =='posix' else 'cls')
+	os.system(command)
 
 # tests large prime numbers
 def is_Prime(n):
