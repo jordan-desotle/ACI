@@ -1,5 +1,6 @@
 import random
 import os
+import sympy
 
 red_color="\033[1;31m"
 green_color="\033[0;32m"
@@ -12,12 +13,21 @@ white_color="\033[0;37m"
 
 
 class EllipticCurve:
+	multiplicative_table = []
 	def __init__(self, p, a, b):
 		self.p = p
 		self.a = a
 		self.b = b
 
-
+	def gen_tables():
+		for i in range (0, self.p):
+			temp_arr = []
+			for j in range(0, self.p):
+				temp_int = (i*j)%self.p
+				temp_arr.append(temp_int)
+			multiplicative_table.append(temp_arr)
+	def print_table():
+		print(multiplicative_table)
 
 def get_inp():
 	good_A = False
@@ -78,14 +88,12 @@ def print_Inp(p, a, b):
 	if(not (b==None)):
 		b_color = green_color	
 
-	os.system("clear")
+	os.system("cls")
 	print('-'*30)
 	print("{p_col}P: {p_val}\n{a_col}A: {a_val}\n{b_col}B: {b_val}{white}".format(p_val=p, a_val=a, b_val=b, p_col=p_color, a_col=a_color, b_col=b_color, white=white_color))
 	print('-'*30)
 
 
-
- 
 def is_Prime(n):
     """
     Miller-Rabin primality test.
@@ -132,6 +140,8 @@ inp = get_inp()
 
 
 testCurve = EllipticCurve(inp[0], inp[1], inp[2])
+testCurve.gen_tables()
+print(testCurve.multiplicative_table)
 
 
 
