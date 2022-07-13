@@ -1,3 +1,4 @@
+from tabulate import tabulate
 import random
 import os
 
@@ -12,19 +13,23 @@ white_color="\033[0;37m"
 
 # Represents an Elliptic Curve
 class EllipticCurve:
+	mult_table = []
 	def __init__(self, p, a, b):
 		self.p = p
 		self.a = a
 		self.b = b
-	def gen_tables():
+		
+
+	def gen_tables(self):
+
 		for i in range (0, self.p):
 			temp_arr = []
 			for j in range(0, self.p):
 				temp_int = (i*j)%self.p
 				temp_arr.append(temp_int)
-			multiplicative_table.append(temp_arr)
+			self.mult_table.append(temp_arr)
 	def print_table():
-		print(multiplicative_table)
+		print(self.mult_table)
 
 
 
@@ -184,9 +189,8 @@ inp = get_inp()
 testCurve = EllipticCurve(inp[0], inp[1], inp[2])
 
 testCurve.gen_tables()
-print(testCurve.multiplicative_table)
 
-
+print(tabulate(testCurve.mult_table))
 
 
 
