@@ -1,5 +1,6 @@
 import random
 import os
+from sympy import *
 
 red_color="\033[1;31m"
 green_color="\033[0;32m"
@@ -10,21 +11,118 @@ blue_color="\033[0;34m"
 white_color="\033[0;37m"
 
 
+INF_POINT = None
+
+
 # Represents an Elliptic Curve
 class EllipticCurve:
 	def __init__(self, p, a, b):
 		self.p = p
 		self.a = a
 		self.b = b
-	def gen_tables():
-		for i in range (0, self.p):
-			temp_arr = []
-			for j in range(0, self.p):
-				temp_int = (i*j)%self.p
-				temp_arr.append(temp_int)
-			multiplicative_table.append(temp_arr)
-	def print_table():
-		print(multiplicative_table)
+
+
+	def addition(self, point1, point2):
+		if (point1 == INF_POINT):
+			return point2
+		if (point2 == INF_POINT):
+			return point1
+
+		(x1, y1) = point1
+		(x2, y2) = point2
+
+		# Checks for vertical points
+		if(self.equal_mod_p(x1, x2) and self.equal_mod_p(y1, -y2)):
+			return INF_POINT
+
+		# Calculate s-value
+		if(self.equal_mod_p(x1, x2) and self.equal_mod_p(y1, y2)):
+			# Adding point to itself
+			s = (self.reduce_mod_p(3 * x1**2 + self.a)) * (self.inverse_mod_p(2 * y1))
+			#s = (self.reduce_mod_p(3 * x1**2 + self.a)) / (self.reduce_mod_p(2 * y1))
+		else:
+			s = (self.reduce_mod_p(y1 - y2)) * (self.inverse_mod_p(x1 - x2))
+			#s = (self.reduce_mod_p(y1 - y2)) / (self.reduce_mod_p(x1 - x2))
+
+		s2 = self.reduce_mod_p(y1 - s * x1)
+
+		x3 = self.reduce_mod_p(s**2 - x1 - x2)
+		y3 = self.reduce_mod_p(-s * x3 - s2)
+
+		new_point = (x3, y3)
+
+		return new_point
+
+
+	def reduce_mod_p(self, num):
+		return (num % self.p)
+
+	def equal_mod_p(self, num1, num2):
+		return (self.reduce_mod_p(num1 - num2) == 0)
+
+	def inverse_mod_p(self, num):
+		if(self.reduce_mod_p(num) == 0):
+			return None
+		return pow(num, self.p - 2, self.p)
+
+	# returns random points on the curve. only works for small p-values
+	def return_random_points(self, num_points):
+
+		# implement algorith to determine the total number of points
+		if(num_points > 2):
+			num_points = 2
+			print("Can only return 2 points at this time")
+		if(num_points <= 0):
+			num_points = 1
+			print("Number of points to be returned must be greater than 0")
+
+		x, a, b= symbols("x a b")
+		equation = x**3 + a*x + b
+		equation = equation.subs(a, self.a).subs(b, self.b)
+		solutions = []
+		for i in range(0, self.p):
+			final_equation = equation
+			final_equation = final_equation.subs(x, i)
+			yy = final_equation%self.p
+			solutions.append(yy)
+
+		coords = []
+		for x in range(0,self.p):
+			for j in range(0,self.p):
+				tmp = []
+				if((j**2)%self.p == solutions[x]):
+					tmp.append(x)
+					tmp.append(j)
+					coords.append(tmp)
+		# print(coords)
+
+		coords_cp = coords
+		length = self.p
+		return_val = []
+		for p in range(0, num_points):
+			ind = random.randint(0, length)
+			return_val.append(coords_cp[ind])
+			del coords_cp[ind]
+
+		return return_val
+
+
+
+	def multiply(self, k, P):
+		Q = INF_POINT
+		while k != 0:
+			if k & 1 != 0:
+				Q = self.addition(Q, P)
+			P = self.addition(P, P)
+			k >>= 1
+		return Q
+
+	def check_point(self, point):
+		(x, y) = point
+		# print("Y^2%P: " + str(self.reduce_mod_p(y*y)))
+		#print(self.reduce_mod_p(x**3 + self.a * x + self.b))
+		return self.equal_mod_p(y**2, x**3 + self.a * x + self.b)
+
 
 
 
@@ -55,7 +153,8 @@ def get_inp():
 		inp = int(input("Enter a value for A: "))
 		if((inp < 0) or (inp >= p)):
 			print_Inp(p, a, b)
-			print("{red}Conditions for 'A':\nA >= 0, A < P{white}".format(red=red_color, white=white_color))
+			good_A = True
+			# print("{red}Conditions for 'A':\nA >= 0, A < P{white}".format(red=red_color, white=white_color))
 		else:
 			a = inp
 			good_A = True
@@ -66,7 +165,8 @@ def get_inp():
 		inp = int(input("Enter a value for B: "))
 		if((inp < 0) or (inp >= p)):
 			print_Inp(p, a, b)
-			print("{red}Conditions for 'B':\nB >= 0, B < P{white}".format(red=red_color, white=white_color))
+			good_B = True
+			# print("{red}Conditions for 'B':\nB >= 0, B < P{white}".format(red=red_color, white=white_color))
 			# print_Inp(p, a, b)
 		else:
 			b = inp
@@ -87,8 +187,7 @@ def print_Inp(p, a, b):
 	if(not (a==None)):
 		a_color = green_color
 	if(not (b==None)):
-		b_color = green_color	
-
+		b_color = green_color
 
 	clear()
 	print('-'*30)
@@ -98,7 +197,6 @@ def print_Inp(p, a, b):
 def clear():
 	command = ('clear' if os.name =='posix' else 'cls')
 	os.system(command)
-
 
 
 
@@ -179,24 +277,45 @@ def isPrime(n):
 
 
 # Get input from user
-inp = get_inp()
+# inp = get_inp()
+# p = inp[0]
+# a = inp[1]
+# b = inp[2]
 
-testCurve = EllipticCurve(inp[0], inp[1], inp[2])
-
-testCurve.gen_tables()
-print(testCurve.multiplicative_table)
-
-
-
-
-
-
-
+# # Bitcoin values
+# p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+# a = 0
+# b = 7
+# # Bitcoin generator point
+# p1 = (55066263022277343669578718895168534326250603453777594175500187360389116729240, 32670510020758816978083085130507043184471273380659243275938904335757337482424)
 
 
+p = 7
+a = 3
+b = 2
+p1 = (2, 3)
+p2 = (4, 6)
+
+testCurve = EllipticCurve(p, a, b)
+print(testCurve.return_random_points(2))
+
+# p1 = (55, 22) # true
+# print(testCurve.check_point(p1))
+# p1 = (53, 53) # true
+# print(testCurve.check_point(p1))
+# p1 = (53, 26) # true
+# print(testCurve.check_point(p1))
+# p1 = (54, 22) # false
+# print(testCurve.check_point(p1))
+# p1 = (32, 9) # true
+# print(testCurve.check_point(p1))
+# p1 = (17, 22) # false
+# print(testCurve.check_point(p1))
 
 
 
+# print(testCurve.addition(p1, p2))
+# print(testCurve.check_point(p2))
 
 
 
