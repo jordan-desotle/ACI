@@ -1,6 +1,12 @@
-Send a push to master:
-git add file_name.py
-git commit -m "message here"
+Make a commit to your branch:
+- git add file_name.py
+- git commit -m "message here"
+- git push origin branch_name
 
 Update branch from master
-git pull origin master
+- git pull origin master
+
+Merge to master:
+- Switch branch to master branch:
+	git checkout master
+- 
