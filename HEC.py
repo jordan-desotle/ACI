@@ -43,8 +43,9 @@ class HyperEllipticCurve:
 		print(coords)
 		return coords
 
-	def calculate_cubic_equation(D1, D2):
-		pass
+	def calculate_cubic_equation(self, D1, D2):
+		print(D1)
+		print(D2)
 
 
 	def plot_points(self, coords):
@@ -77,13 +78,13 @@ coords = hec.solve_for_coords()
 hec.plot_points(coords)
 
 
-# p1 = (3,0)
-# p2 = (1,2)
-# p3 = (4,1)
-# p4 = (1,3)
+p1 = (3,0)
+p2 = (1,2)
+p3 = (4,1)
+p4 = (1,3)
 
-# D1 = [p1, p2]
-# D2 = [p3, p4]
+D1 = [p1, p2]
+D2 = [p3, p4]
 
-# calculate_cubic_equation(D1, D2)
+hec.calculate_cubic_equation(D1, D2)
 
