@@ -44,8 +44,36 @@ class HyperEllipticCurve:
 		return coords
 
 	def calculate_cubic_equation(self, D1, D2):
-		print(D1)
-		print(D2)
+		# print(D1)
+		# print(D2)
+
+		p1, p2 = (D1[0], D1[1])
+		p3, p4 = (D2[0], D2[1])
+
+		# need array of x and y values
+		x_values = [p1[0], p2[0], p3[0], p4[0]]
+		y_values = [p1[1], p2[1], p3[1], p4[1]]
+
+		print(x_values)
+		print(y_values)
+
+		x = Symbol("x")
+
+		equations = []
+		for i in range(0,4):
+			# print("I: " + str(i))
+			product_of_tmp_equations = 1
+			for j in range(0, 4):
+				if(j!=i):
+					#print("X value [{i_val}]: {x_val_i}, X value [{j_val}]: {x_val_j}".format(i_val=i, x_val_i=x_values[i], j_val=j, x_val_j=x_values[j]))
+					#print("Coefficient: " + str(self.inverse_mod_p(x_values[i] - x_values[j])))
+					tmp_eq = (x - 1) * self.inverse_mod_p(x_values[i] - x_values[j])
+					# print(tmp_eq)
+					product_of_tmp_equations *= tmp_eq
+			print(product_of_tmp_equations)
+			final_tmp = simplify(product_of_tmp_equations)
+			print(final_tmp)
+
 
 
 	def plot_points(self, coords):
@@ -63,25 +91,61 @@ class HyperEllipticCurve:
 
 		plt.show()
 
+	def reduce_mod_p(self, num):
+		return (num % self.p)
 
-p = 5
+	def equal_mod_p(self, num1, num2):
+		return (self.reduce_mod_p(num1 - num2) == 0)
+
+	def inverse_mod_p(self, num):
+		if(self.reduce_mod_p(num) == 0):
+			return None
+		return pow(num, self.p - 2, self.p)
+
+	def check_point(self, point):
+		(x, y) = point
+		x_sym = Symbol("x")
+		equation = self.eq.subs(x_sym, x)
+		return self.equal_mod_p(y**2, equation)
+
+
+
+p = 23
+
+# p = 5
+# c1 = 1
+# c2 = 0
+# c3 = 3
+# c4 = 2
+# c5 = 0
+# c6 = 3
+
+# p1 = (3,0)
+# p2 = (1,2)
+# p3 = (4,1)
+# p4 = (1,3)
 
 c1 = 1
-c2 = 0
-c3 = 3
-c4 = 2
-c5 = 0
-c6 = 3
+c2 = -1
+c3 = -11
+c4 = 9
+c5 = 18
+c6 = 0
 
 hec = HyperEllipticCurve(p, c1, c2, c3, c4, c5, c6)
 coords = hec.solve_for_coords()
 hec.plot_points(coords)
 
 
-p1 = (3,0)
-p2 = (1,2)
-p3 = (4,1)
-p4 = (1,3)
+p1 = (1, 19)
+p2 = (8, 1)
+p3 = (11, 1)
+p4 = (17, 11)
+
+# print(hec.check_point(p1))
+# print(hec.check_point(p2))
+# print(hec.check_point(p3))
+# print(hec.check_point(p4))
 
 D1 = [p1, p2]
 D2 = [p3, p4]
