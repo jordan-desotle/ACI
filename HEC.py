@@ -12,8 +12,10 @@ blue_color="\033[0;34m"
 white_color="\033[0;37m"
 
 
+mult_table = []
 
 class HypEllipticCurve:
+	mult_table = []
 
 	def __init__(self, p):
 		self.p = p
@@ -26,7 +28,7 @@ class HypEllipticCurve:
 	def calculate_list(self, exp):
 		yy_list =[]
 		for i in range (0, self.p):
-			yy_list.append(self.calculate_yy(i, exp))
+			yy_list.append(self.reduce_mod_p(self.calculate_yy(i, exp)))
 
 		return yy_list
 	def x_list(self):
@@ -34,6 +36,41 @@ class HypEllipticCurve:
 		for i in range(0, self.p):
 			x_list.append(i)
 		return x_list
+
+	def reduce_mod_p(self, num):
+		return (num % self.p)
+
+	def equal_mod_p(self, num1, num2):
+		return (self.reduce_mod_p(num1 - num2) == 0)
+
+	def inverse_mod_p(self, num):
+		if(self.reduce_mod_p(num) == 0):
+			return None
+		return pow(num, self.p - 2, self.p)
+
+	# def gen_tables(self):
+		
+	#  	for i in range (0, self.p):
+	#  		temp_arr = []
+	#  		for j in range (0, self.p):
+	#  			temp = self.reduce_mod_p((i * j))
+	#  			temp_arr.append(temp)
+	#  		mult_table.append(temp_arr)
+
+	def points_on_curve(self, point_list):
+	 	y_of_curve = []
+	 	x_of_curve = []
+	 	curve_points = []
+	 	for i in range(0, self.p):
+	 		for j in range(0, self.p):
+	 			if(self.reduce_mod_p(i**2) == point_list[1][j]):
+	 				y_of_curve.append(i)
+	 				x_of_curve.append(j)
+	 	curve_points.append(x_of_curve)
+	 	curve_points.append(y_of_curve)
+
+	 	return curve_points
+
 
 
 def get_inp():
@@ -154,7 +191,8 @@ def isPrime(n):
 
 
 x = Symbol("x")
-new_exp = x**5 - x**4 - (11*x)**3 +(9*x)**2 + 18 * x
+#new_exp = x**5 - x**4 - 11*x**3 +9*x**2 + 18 * x
+new_exp = x**5 + 3*x**3 + 2*x**2 +3
 
 inp = get_inp()
 hec = HypEllipticCurve(inp)
@@ -165,6 +203,11 @@ point_list = []
 point_list.append(hec.x_list())
 point_list.append(hec.calculate_list(new_exp))
 
-print(point_list[0])
-print("\n")
-print(point_list[1])
+# print(point_list[0])
+# print("\n")
+# print(point_list[1])
+
+
+print(hec.points_on_curve(point_list)[0])
+print(hec.points_on_curve(point_list)[1])
+
