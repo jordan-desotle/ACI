@@ -21,7 +21,6 @@ class EllipticCurve:
 		self.a = a
 		self.b = b
 
-
 	def addition(self, point1, point2):
 		if (point1 == INF_POINT):
 			return point2
@@ -69,9 +68,9 @@ class EllipticCurve:
 	def return_random_points(self, num_points):
 
 		# implement algorith to determine the total number of points
-		if(num_points > 2):
-			num_points = 2
-			print("Can only return 2 points at this time")
+		# if(num_points > 2):
+		# 	num_points = 2
+		# 	print("Can only return 2 points at this time")
 		if(num_points <= 0):
 			num_points = 1
 			print("Number of points to be returned must be greater than 0")
@@ -104,9 +103,9 @@ class EllipticCurve:
 			return_val.append(coords_cp[ind])
 			del coords_cp[ind]
 
+		print("Getting random points: ")
+
 		return return_val
-
-
 
 	def multiply(self, k, P):
 		Q = INF_POINT
@@ -122,6 +121,20 @@ class EllipticCurve:
 		# print("Y^2%P: " + str(self.reduce_mod_p(y*y)))
 		#print(self.reduce_mod_p(x**3 + self.a * x + self.b))
 		return self.equal_mod_p(y**2, x**3 + self.a * x + self.b)
+
+	def generate_psuedo_random_nums(self, num, point, counter):
+		# print(f'Counter: {counter}, Point: {point}, K: {num}')
+		c = counter
+		p = point
+		k = num
+		while c > 0:
+			p = self.multiply(k, p)
+			k = p[1]
+			c-=1
+			# print("New Point: " + str(n))
+			print('[{count:0>5}]: {y}'.format(count=counter-c, y=k))
+			# self.generate_psuedo_random_nums(n[1], n, counter - 1)
+
 
 
 
@@ -282,7 +295,58 @@ def isPrime(n):
 # a = inp[1]
 # b = inp[2]
 
-# # Bitcoin values
+
+
+# testCurve = EllipticCurve(79, 3, 2)
+# # point = testCurve.return_random_points(1)[0]
+# print(f'Is point {point} on curve? {testCurve.check_point(point)}')
+
+# new_point = point
+# for i in range(0,10):
+# 	new_point = testCurve.addition(new_point, new_point)
+# 	print(new_point)
+
+
+# print(testCurve.multiply(9, point[0]))
+# testCurve.generate_psuedo_random_nums(point[0][1], point[0], 5)
+
+
+
+
+# Bitcoin values
+p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
+a = 0
+b = 7
+# Bitcoin generator point
+p1 = (55066263022277343669578718895168534326250603453777594175500187360389116729240, 32670510020758816978083085130507043184471273380659243275938904335757337482424)
+
+
+testCurve = EllipticCurve(p, a, b)
+
+
+# new_point = p1
+# for i in range(0,1000):
+# 	new_point = testCurve.addition(new_point, new_point)
+# 	print(new_point)
+# 	print(f"Is point {new_point} on curve? {testCurve.check_point(new_point)}")
+
+
+
+testCurve.generate_psuedo_random_nums(random.randint(0, p1[0]), p1, 10000)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Bitcoin values
 # p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
 # a = 0
 # b = 7
@@ -290,14 +354,16 @@ def isPrime(n):
 # p1 = (55066263022277343669578718895168534326250603453777594175500187360389116729240, 32670510020758816978083085130507043184471273380659243275938904335757337482424)
 
 
-p = 7
-a = 3
-b = 2
-p1 = (2, 3)
-p2 = (4, 6)
+# p = 7
+# a = 3
+# b = 2
 
-testCurve = EllipticCurve(p, a, b)
-print(testCurve.return_random_points(2))
+# p1 = (2, 3)
+# p2 = (4, 6)
+
+# testCurve = EllipticCurve(p, a, b)
+
+# print(testCurve.return_random_points(2))
 
 # p1 = (55, 22) # true
 # print(testCurve.check_point(p1))
