@@ -3,7 +3,7 @@ import os
 from sympy import *
 
 red_color="\033[1;31m"
-green_color="\033[0;32m"
+green_color="\033[1;32m"
 yellow_color="\033[0;33m"
 purple_color="\033[0;35m"
 cyan_color="\033[0;36m"
@@ -287,7 +287,97 @@ def isPrime(n):
 
 	return True
 
+def print_general_exchange():
+	# general_text = []
+	data = []
 
+	# general_text.append("A curve 'C' is picked and communicated between Bob and Alice")
+	general_text = "{color}A curve 'C' is picked and communicated between Bob and Alice{white}".format(color=yellow_color, white=white_color)
+	data.append(["C", "C", "C"])
+	update_data(general_text, data)
+	input("")
+
+	# general_text.append("Alice and Bob both agree on a point on the curve 'C'.\nThis is known as the generator point 'G'")
+	general_text = "{color}Alice and Bob both agree on a point on the curve 'C'.\nThis is known as the generator point 'G'{white}".format(color=yellow_color, white=white_color)
+	data.append(["G", "G", "G"])
+	update_data(general_text, data)
+	input("")
+
+	# general_text.append("Alice and Bob now create their own private keys 'a' and 'b'")
+	general_text = "{color}Alice and Bob now create their own private keys 'a' and 'b'{white}".format(color=yellow_color, white=white_color)
+	data.append(["a", "", "b"])
+	update_data(general_text, data)
+	input("")
+
+	# general_text.append("Alice multiplies the generator point 'G' by her private key 'a' to get her public key 'aG'.\nShe then sends this to Bob")
+	general_text = "{color}Alice multiplies the generator point 'G' by her private key 'a' to get her public key 'aG'.\nShe then sends this to Bob{white}".format(color=yellow_color, white=white_color)
+	data.append(["aG", "aG", "aG"])
+	update_data(general_text, data)
+	input("")
+
+	# general_text.append("Bob generates his public key the same way 'bG' and sends this to Alice")
+	general_text = "{color}Bob generates his public key the same way 'bG' and sends this to Alice{white}".format(color=yellow_color, white=white_color)
+	data.append(["bG", "bG", "bG"])
+	update_data(general_text, data)
+	input("")
+
+	general_text = "{color}With eachothers public keys, Alice and Bob can multiply them by their private keys to get the secret key\nThe point generated will be private to Alice and Bob due to their private keys being unknown{white}".format(color=yellow_color, white=white_color)
+	data.append(["abG", "", "baG"])
+	update_data(general_text, data)
+	input("")
+
+	general_text = "{color}With an unknown point to the Middle Man on the curve, Alice and Bob can choose to use either the X-value or the Y-value as their encryption key{white}".format(color=yellow_color, white=white_color)
+	print(general_text)
+
+
+
+
+def update_data(general_text, data):
+	# data = []
+	clear()
+
+	print_boxs(data)
+	# for i in general_text:
+	# 	print(i)
+	# print('─'*40)
+	print(general_text)
+	# print('─'*40)
+
+def print_boxs(data):
+	min_leng = 20
+	min_lines = 4
+	for j in data:
+		if(len(j) > min_leng):
+			min_leng = len(j)
+	min_leng += 4
+
+	if(len(data)> min_lines):
+		min_lines = len(data)
+
+
+	names = ["Alice", "Middle Man", "Bob"]
+
+	# print("lines: " + str(lines))
+	# print("min_leng: " + str(min_leng))
+	box = cyan_color
+
+	# print(min_leng)
+	print('{color}{name:^{length}}{space}'.format(name=names[0], length=min_leng+2, space=' '*5, color=green_color) + '{color}{name:^{length}}{space}'.format(name=names[1], length=min_leng+2, space=' '*5, color=red_color) + '{color}{name:^{length}}{space}'.format(name=names[2], length=min_leng+2, space=' '*5, color=green_color))
+	print('{box_color}┌{line}┐{white}{space}'.format(line='─'*min_leng, space=' '*5, box_color=box, white=white_color)*3)
+	if len(data) == 0:
+		for i in range(0, min_lines):
+			print('{box_color}│{white}{line}{box_color}│{white}{space}'.format(line=' '*min_leng, space=' '*5, box_color=box, white=white_color)*3)
+		print('{box_color}└{line}┘{white}{space}'.format(line='─'*min_leng, space=' '*5, box_color=box, white=white_color)*3)
+	else:
+		cnt = 0
+		for i in data:
+			print('{box_color}│{white}{line:^{length}}{box_color}│{white}{space}'.format(line=str(i[0]), length=min_leng, space=' '*5, white=white_color, box_color=box) + '{box_color}│{white}{line:^{length}}{box_color}│{white}{space}'.format(line=str(i[1]), length=min_leng, space=' '*5, white=white_color, box_color=box) + '{box_color}│{white}{line:^{length}}{box_color}│{white}{space}'.format(line=str(i[2]), length=min_leng, space=' '*5, white=white_color, box_color=box))
+			cnt += 1
+		if(cnt < min_lines):
+			for i in range(cnt, min_lines):
+				print('{box_color}│{line}│{white}{space}'.format(line=' '*min_leng, space=' '*5, box_color=box, white=white_color)*3)
+				cnt += 1
+	print('{box_color}└{line}┘{white}{space}'.format(line='─'*min_leng, space=' '*5, box_color=box, white=white_color)*3)
 
 # Get input from user
 # inp = get_inp()
@@ -324,6 +414,7 @@ p1 = (55066263022277343669578718895168534326250603453777594175500187360389116729
 testCurve = EllipticCurve(p, a, b)
 
 
+
 # new_point = p1
 # for i in range(0,1000):
 # 	new_point = testCurve.addition(new_point, new_point)
@@ -332,10 +423,11 @@ testCurve = EllipticCurve(p, a, b)
 
 
 
-testCurve.generate_psuedo_random_nums(random.randint(0, p1[0]), p1, 10000)
+# testCurve.generate_psuedo_random_nums(random.randint(0, p1[0]), p1, 10000)
 
-
-
+clear()
+print_Inp(p, a, b)
+print_general_exchange()
 
 
 
