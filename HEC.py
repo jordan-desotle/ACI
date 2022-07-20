@@ -226,68 +226,108 @@ class HyperEllipticCurve:
 	def cantors_algorithm(self, divisors):
         # print(divisors)
 
-        divisor1 = divisors[0]
-        divisor2 = divisors[1]
+		divisor1 = divisors[0]
+		divisor2 = divisors[1]
 
-        u1, v1 = divisor1
-        u2, v2 = divisor2
+		u1, v1 = divisor1
+		u2, v2 = divisor2
 
-        e1, e2, c1, c2= symbols("e1 e2 c1 c2")
+		e1, e2, c1, c2= symbols("e1 e2 c1 c2")
 
-        d1 = gcd(u1, u2)
-        print("E1, E2: " + str(solve(Eq(e1 * u1 + e2 * u2, d1), e1, e2)))
+		d1 = gcd(u1, u2)
+		# print("E1, E2: " + str(solve(Eq(e1 * u1 + e2 * u2, d1), e1, e2)))
+		d = gcd(d1, v1 + v2)
+		# print("C1, C2: " + str(solve(Eq(c1 * d1 + c2 *(v1 + v2), d), c1, c2)))
 
-        d = gcd(d1, v1 + v2)
-        print("C1, C2: " + str(solve(Eq(c1 * d1 + c2 *(v1 + v2), d), c1, c2)))
+		e_dict = solve(Eq(e1 * u1 + e2 * u2, d1), e1, e2)
+		c_dict = solve(Eq(c1 * d1 + c2 *(v1 + v2), d), c1, c2)
 
+		print(e_dict)
+		print(c_dict)
 
-        # print("c1: " + str(c1))
-        # print("c2: " + str(c2))
+		e1_val = e_dict[e1]
+		e2_val = e_dict[e2]
+		c1_val = c_dict[c1]
+		c2_val = c_dict[c2]
 
-        # s1 = (c1 * e1)
-        # s2 = (c1 * e2)
-        # s3 = c2
+		print(f"e1: {e1_val}, e2: {e2_val}, c1: {c1_val}, c2: {c2_val}")
 
-        # u = (u1 * u2) / d**2
+		s1 = (c1_val * e1_val)
+		s2 = (c1_val * e2_val)
+		s3 = c2_val
 
-        # u = cancel(u)
-        # # u = self.reduce_equation_mod_p(u)
-        # v = simplify(self.reduce_modulo_poly((((s1*u1*v2)+(s2*u2*v1)+(s3*(v1*v2+(self.eq)))) / d), u))
-
-
-        # while(degree(u) > 2):
-
-        #     # print("degree of u: " + str(degree(u)))
-
-        #     u_prime = u_prime = div((self.eq - simplify(cancel(v**2))), u)[0]
-        #     # print("u': " + str(u_prime))
-        #     # print("-v mod u': " + str(Mod(-1*v, u_prime)))
-        #     v_prime = (div(-1*v, u_prime)[1])
+		u = (u1 * u2) / d**2
 
 
-        #     # print("u': " + str(u_prime))
-        #     # print("v': " + str(v_prime))
-
-        #     u = u_prime
-        #     v = v_prime
-
-        # u = monic(u)
-        # print("u3: " + str(u))
-        # print("v3: " + str(v))
+		u = cancel(u)
+		v = simplify(self.reduce_modulo_poly((((s1*u1*v2)+(s2*u2*v1)+(s3*(v1*v2+(self.eq)))) / d), u))
 
 
+		while(degree(u) > 2):
 
+			u_prime = u_prime = div((self.eq - simplify(cancel(v**2))), u)[0]
+			v_prime = (div(-1*v, u_prime)[1])
+
+			u = u_prime
+			v = v_prime
+
+		u = monic(u)
+		print("u3: " + str(u))
+		print("v3: " + str(v))
+
+
+
+# Birkner Slide Example
+#-------------------------------------------#
 p = 11
 c1 = 1
-c2 = -4
-c3 = -14
-c4 = 36
-c5 = 45
-c6 = 0
+c2 = 0
+c3 = 3
+c4 = 7
+c5 = 1
+c6 = 2
 
 x = Symbol("x")
 
-new_divisors = [[x**2 - 4*x + 3, -4*x + 12], [x**2 -6*x + 5, -2*x + 10]]
+new_divisors = [[x**2 + 7*x + 10, x + 9], [x**2 + 10, 7*x + 9]]
 
 hec = HyperEllipticCurve(p, c1, c2, c3, c4, c5, c6)
 hec.cantors_algorithm(new_divisors)
+#-------------------------------------------#
+
+
+# Imaginary HyperElliptic Curve Wiki Example
+#-------------------------------------------#
+# p = 11
+# c1 = 1
+# c2 = -4
+# c3 = -14
+# c4 = 36
+# c5 = 45
+# c6 = 0
+
+# x = Symbol("x")
+
+# new_divisors = [[x**2 - 4*x + 3, -4*x + 12], [x**2 -6*x + 5, -2*x + 10]]
+
+# hec = HyperEllipticCurve(p, c1, c2, c3, c4, c5, c6)
+# hec.cantors_algorithm(new_divisors)
+#-------------------------------------------#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
