@@ -110,12 +110,11 @@ class HyperEllipticCurve:
 		# for c in coeffs:
 
 	def reduce_modulo_poly(self, poly, mod):
-		print(poly)
-		print(mod)
+		# print(poly)
+		# print(mod)
 
 		remainder = prem(poly, mod)
 		return remainder
-
 
 	def plot_points(self, coords):
 		x_coords = []
@@ -177,14 +176,13 @@ class HyperEllipticCurve:
 
 		return new_coeffs
 
-
 	def mumford_rep(self, D1, D2):
 		divisors = [D1, D2]
 		
 		new_divisors = []
 		for i in divisors:
 			mum_rep = []
-			print(i)
+			# print(i)
 
 			x, y, a, b = symbols("x y a b")
 
@@ -208,7 +206,7 @@ class HyperEllipticCurve:
 			# print(system_of_equations)
 
 			solved = solve(system_of_equations)
-			print(solved)
+			# print(solved)
 
 			a_val = self.reduce_mod_p(solved[a])
 			b_val = self.reduce_mod_p(solved[b])
@@ -226,99 +224,57 @@ class HyperEllipticCurve:
 		return new_divisors
 
 	def cantors_algorithm(self, divisors):
-		print(divisors)
+        # print(divisors)
 
-		divisor1 = divisors[0]
-		divisor2 = divisors[1]
+        divisor1 = divisors[0]
+        divisor2 = divisors[1]
 
-		u1, v1 = divisor1
-		u2, v2 = divisor2
+        u1, v1 = divisor1
+        u2, v2 = divisor2
 
-		print("u1: " + str(u1) + ", v1: " + str(v1))
-		print("u2: " + str(u2) + ", v2: " + str(v2))
+        e1, e2, c1, c2= symbols("e1 e2 c1 c2")
 
-		# d1 = self.reduce_modulo_poly(u1, u2)
-		d1 = gcd(u1, u2)
-		print("d1: " + str(d1))
+        d1 = gcd(u1, u2)
+        print("E1, E2: " + str(solve(Eq(e1 * u1 + e2 * u2, d1), e1, e2)))
 
-		# e1 = d1 / 2 * u1
-		# e2 = d1 / 2 * u2
+        d = gcd(d1, v1 + v2)
+        print("C1, C2: " + str(solve(Eq(c1 * d1 + c2 *(v1 + v2), d), c1, c2)))
 
 
+        # print("c1: " + str(c1))
+        # print("c2: " + str(c2))
+
+        # s1 = (c1 * e1)
+        # s2 = (c1 * e2)
+        # s3 = c2
+
+        # u = (u1 * u2) / d**2
+
+        # u = cancel(u)
+        # # u = self.reduce_equation_mod_p(u)
+        # v = simplify(self.reduce_modulo_poly((((s1*u1*v2)+(s2*u2*v1)+(s3*(v1*v2+(self.eq)))) / d), u))
 
 
+        # while(degree(u) > 2):
 
-		e1 = 1/2
-		e2 = -1/2
+        #     # print("degree of u: " + str(degree(u)))
 
-		print("e1: " + str(e1))
-		print("e2: " + str(e2))
-
-		# d = self.reduce_modulo_poly(d1, v1 + v2)
-		d = gcd(d1, v1 + v2)
-		print("d: " + str(d))
-
-		# # c1 = d / (2 * d1)
-		# # c2 = d / (2*(v1 + v2))
-
-		c1 = 3/8
-		c2 = 1/16
-
-		print("c1: " + str(c1))
-		print("c2: " + str(c2))
-
-		s1 = c1 * e1
-		s2 = c1 * e2
-		s3 = c2
-
-		u = (u1 * u2) / d**2
-
-		u = cancel(u)
-		# u = self.reduce_equation_mod_p(u)
-		v = simplify(self.reduce_modulo_poly((((s1*u1*v2)+(s2*u2*v1)+(s3*(v1*v2+(self.eq)))) / d), u))
-		#v = simplify(self.reduce_modulo_poly((s1*u1*v2+s2*u2*v1), u))
-		# print("v^2: " + str(simplify(cancel(v**2))))
-
-		# # print("s1: " + str(s1))
-		# # print("s2: " + str(s2))
-		# # print("s3: " + str(s3))
-		# # print("u: " + str(u))
-		# # print("v: " + str(v))
-		
-		# print(self.eq)
-
-		u_prime = div((self.eq - simplify(cancel(v**2))), u)[0]
-		print("u': " + str(u_prime))
-
-		v_prime = (prem(-1*v, u_prime))
-		print("v': " + str(v_prime))
-
-		# # find multiplicitve inverse 
-
-		# # while(degree(u) > 2):
-
-		# # 	print("degree of u: " + str(degree(u)))
-
-		# # 	u_prime = (self.eq - v**2) / u
-		# # 	print("u': " + str(u_prime))
-		# # 	print("-v mod u': " + str(Mod(-1*v, u_prime)))
-		# # 	v_prime = (prem(-1*v, u_prime))
+        #     u_prime = u_prime = div((self.eq - simplify(cancel(v**2))), u)[0]
+        #     # print("u': " + str(u_prime))
+        #     # print("-v mod u': " + str(Mod(-1*v, u_prime)))
+        #     v_prime = (div(-1*v, u_prime)[1])
 
 
-		# # 	print("u': " + str(u_prime))
-		# # 	print("v': " + str(v_prime))
+        #     # print("u': " + str(u_prime))
+        #     # print("v': " + str(v_prime))
 
-		# # 	u = u_prime
-		# # 	v = v_prime
+        #     u = u_prime
+        #     v = v_prime
 
-		# # # u = self.reduce_equation_mod_p(u)
-		# # # v = self.reduce_equation_mod_p(v)
+        # u = monic(u)
+        # print("u3: " + str(u))
+        # print("v3: " + str(v))
 
-		# # print("u: " + str(u))
-		# # print("v: " + str(v))
-
-
-		# d1 = reduce_modulo_poly()
 
 
 p = 11
@@ -329,82 +285,9 @@ c4 = 36
 c5 = 45
 c6 = 0
 
-
-
-
-
-# c1 = 1
-# c2 = 0
-# c3 = 3
-# c4 = 2
-# c5 = 0
-# c6 = 3
-
-
-
-# p = 5
-
-# p1 = (3,0)
-# p2 = (1,2)
-
-# p3 = (4,1)
-# p4 = (3,0)
-
-
-# D1 = [p1, p2]
-# D2 = [p3, p4]
 x = Symbol("x")
 
-print(prem(x**2 + 7*x + 10, 11))
-
-print(prem(x**2 + 4*x + 4, x))
-
-
-
-# new_divisors = [[x**2 + 7*x + 10, x + 9], [x**2 + 10, 7*x + 9]]
 new_divisors = [[x**2 - 4*x + 3, -4*x + 12], [x**2 -6*x + 5, -2*x + 10]]
 
-print(gcd(new_divisors[0][0], new_divisors[1][0]))
-
 hec = HyperEllipticCurve(p, c1, c2, c3, c4, c5, c6)
-# new_divisors = hec.mumford_rep(D1, D2)
-# hec.calculate_cubic_equation(D1, D2)
-
 hec.cantors_algorithm(new_divisors)
-
-
-# ________________________________________________________
-
-# p = 23
-
-# c1 = 1
-# c2 = -1
-# c3 = -11
-# c4 = 9
-# c5 = 18
-# c6 = 0
-
-# hec = HyperEllipticCurve(p, c1, c2, c3, c4, c5, c6)
-# coords = hec.solve_for_coords()
-# hec.plot_points(coords)
-
-# p1 = (1, 19)
-# p2 = (8, 1)
-# p3 = (11, 1)
-# p4 = (17, 11)
-
-# # print(hec.check_point(p1))
-# # print(hec.check_point(p2))
-# # print(hec.check_point(p3))
-# # print(hec.check_point(p4))
-
-# D1 = [p1, p2]
-# D2 = [p3, p4]
-
-# hec.calculate_cubic_equation(D1, D2)
-
-# ________________________________________________________
-
-
-
-
