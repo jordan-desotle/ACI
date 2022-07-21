@@ -141,7 +141,7 @@ class HyperEllipticCurve:
 
         u = (u1 * u2) / d**2
 
-
+        # Need to find a way to call xgcd() from sage math
 
 
         u = self.reduce_equation_mod_p(cancel(u))
