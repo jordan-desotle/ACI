@@ -1,6 +1,7 @@
 import random
 import os
 from sympy import *
+import math as m
 
 red_color="\033[1;31m"
 green_color="\033[1;32m"
@@ -12,6 +13,10 @@ white_color="\033[0;37m"
 
 
 INF_POINT = None
+PATH = './output'
+FILE = '/output.txt'
+
+
 
 
 # Represents an Elliptic Curve
@@ -38,10 +43,8 @@ class EllipticCurve:
 		if(self.equal_mod_p(x1, x2) and self.equal_mod_p(y1, y2)):
 			# Adding point to itself
 			s = (self.reduce_mod_p(3 * x1**2 + self.a)) * (self.inverse_mod_p(2 * y1))
-			#s = (self.reduce_mod_p(3 * x1**2 + self.a)) / (self.reduce_mod_p(2 * y1))
 		else:
 			s = (self.reduce_mod_p(y1 - y2)) * (self.inverse_mod_p(x1 - x2))
-			#s = (self.reduce_mod_p(y1 - y2)) / (self.reduce_mod_p(x1 - x2))
 
 		s2 = self.reduce_mod_p(y1 - s * x1)
 
@@ -64,13 +67,7 @@ class EllipticCurve:
 			return None
 		return pow(num, self.p - 2, self.p)
 
-	# returns random points on the curve. only works for small p-values
 	def return_random_points(self, num_points):
-
-		# implement algorith to determine the total number of points
-		# if(num_points > 2):
-		# 	num_points = 2
-		# 	print("Can only return 2 points at this time")
 		if(num_points <= 0):
 			num_points = 1
 			print("Number of points to be returned must be greater than 0")
@@ -93,7 +90,6 @@ class EllipticCurve:
 					tmp.append(x)
 					tmp.append(j)
 					coords.append(tmp)
-		# print(coords)
 
 		coords_cp = coords
 		length = self.p
@@ -118,12 +114,10 @@ class EllipticCurve:
 
 	def check_point(self, point):
 		(x, y) = point
-		# print("Y^2%P: " + str(self.reduce_mod_p(y*y)))
-		#print(self.reduce_mod_p(x**3 + self.a * x + self.b))
 		return self.equal_mod_p(y**2, x**3 + self.a * x + self.b)
 
 	def generate_psuedo_random_nums(self, num, point, counter):
-		# print(f'Counter: {counter}, Point: {point}, K: {num}')
+		file = open(PATH + FILE, "w")
 		c = counter
 		p = point
 		k = num
@@ -131,10 +125,33 @@ class EllipticCurve:
 			p = self.multiply(k, p)
 			k = p[1]
 			c-=1
-			# print("New Point: " + str(n))
-			print('[{count:0>5}]: {y}'.format(count=counter-c, y=k))
-			# self.generate_psuedo_random_nums(n[1], n, counter - 1)
+			bin_rep = bin(k).replace("0b", "")
+			file.write(bin_rep + "\n")
+			print('[{count:0>5}]: {y}'.format(count=counter-c, y=k, b=bin_rep))
 
+def monobitTest():
+	file = open(PATH + FILE, "r")
+	total_result = 0
+	c = 0
+	for i in file:
+		n = len(i)
+		s = 0
+		for j in i:
+			if(j=="0"):
+				s-=1
+			elif(j=="1"):
+				s+=1
+		c+=1
+
+		sobs = abs(s)/float(m.sqrt(n))
+		p_val = m.erfc(m.fabs(sobs) / m.sqrt(n))
+		total_result += p_val
+
+		# print('[{count:0>5}]: Sum: {sum} Length: {len} Stat: {stat} PVal: {p}'.format(count=c, len=n, sum=s, stat=sobs, p=p_val))
+	total_randomness = (total_result / c)*100
+	print("Total Randomness: {r:.4}%".format(r=total_randomness))
+
+		
 
 
 
@@ -188,7 +205,6 @@ def get_inp():
 
 	return p, a, b
 
-
 # Prints input
 def print_Inp(p, a, b):
 	p_color = red_color
@@ -212,46 +228,28 @@ def clear():
 	os.system(command)
 
 
-
 def power(x, y, p):
-     
-    # Initialize result
     res = 1
-     
-    # Update x if it is more than or
-    # equal to p
+
     x = x % p
     while (y > 0):
-         
-        # If y is odd, multiply
-        # x with result
         if (y & 1):
             res = (res * x) % p
- 
-        # y must be even now
-        y = y>>1 # y = y/2
+
+        y = y>>1
         x = (x * x) % p
      
     return res
 
 def miillerTest(d, n):
-     
-    # Pick a random number in [2..n-2]
-    # Corner cases make sure that n > 4
+
     a = 2 + random.randint(1, n - 4)
- 
-    # Compute a^d % n
+
     x = power(a, d, n)
  
     if (x == 1 or x == n - 1):
         return True;
- 
-    # Keep squaring x while one
-    # of the following doesn't
-    # happen
-    # (i) d does not reach n-1
-    # (ii) (x^2) % n is not 1
-    # (iii) (x^2) % n is not n-1
+
     while (d != n - 1):
         x = (x * x) % n
         d *= 2
@@ -260,27 +258,21 @@ def miillerTest(d, n):
             return False
         if (x == n - 1):
             return True
- 
-    # Return composite
+
     return False
 
 def isPrime(n):
-
 	k = 4
      
-    # Corner cases
 	if (n <= 1 or n == 4):
 		return False
 	if (n <= 3):
 		return True
 
-	# Find r such that n =
-	# 2^d * r + 1 for some r >= 1
 	d = n - 1
 	while (d % 2 == 0):
 		d //= 2
 
-	# Iterate given number of 'k' times
 	for i in range(k):
 		if (miillerTest(d, n) == False):
 			return False
@@ -288,34 +280,28 @@ def isPrime(n):
 	return True
 
 def print_general_exchange():
-	# general_text = []
 	data = []
 
-	# general_text.append("A curve 'C' is picked and communicated between Bob and Alice")
 	general_text = "{color}A curve 'C' is picked and communicated between Bob and Alice{white}".format(color=yellow_color, white=white_color)
 	data.append(["C", "C", "C"])
 	update_data(general_text, data)
 	input("")
 
-	# general_text.append("Alice and Bob both agree on a point on the curve 'C'.\nThis is known as the generator point 'G'")
 	general_text = "{color}Alice and Bob both agree on a point on the curve 'C'.\nThis is known as the generator point 'G'{white}".format(color=yellow_color, white=white_color)
 	data.append(["G", "G", "G"])
 	update_data(general_text, data)
 	input("")
 
-	# general_text.append("Alice and Bob now create their own private keys 'a' and 'b'")
 	general_text = "{color}Alice and Bob now create their own private keys 'a' and 'b'{white}".format(color=yellow_color, white=white_color)
 	data.append(["a", "", "b"])
 	update_data(general_text, data)
 	input("")
 
-	# general_text.append("Alice multiplies the generator point 'G' by her private key 'a' to get her public key 'aG'.\nShe then sends this to Bob")
 	general_text = "{color}Alice multiplies the generator point 'G' by her private key 'a' to get her public key 'aG'.\nShe then sends this to Bob{white}".format(color=yellow_color, white=white_color)
 	data.append(["aG", "aG", "aG"])
 	update_data(general_text, data)
 	input("")
 
-	# general_text.append("Bob generates his public key the same way 'bG' and sends this to Alice")
 	general_text = "{color}Bob generates his public key the same way 'bG' and sends this to Alice{white}".format(color=yellow_color, white=white_color)
 	data.append(["bG", "bG", "bG"])
 	update_data(general_text, data)
@@ -330,18 +316,10 @@ def print_general_exchange():
 	print(general_text)
 
 
-
-
 def update_data(general_text, data):
-	# data = []
 	clear()
-
 	print_boxs(data)
-	# for i in general_text:
-	# 	print(i)
-	# print('─'*40)
 	print(general_text)
-	# print('─'*40)
 
 def print_boxs(data):
 	min_leng = 20
@@ -354,14 +332,9 @@ def print_boxs(data):
 	if(len(data)> min_lines):
 		min_lines = len(data)
 
-
 	names = ["Alice", "Middle Man", "Bob"]
-
-	# print("lines: " + str(lines))
-	# print("min_leng: " + str(min_leng))
 	box = cyan_color
 
-	# print(min_leng)
 	print('{color}{name:^{length}}{space}'.format(name=names[0], length=min_leng+2, space=' '*5, color=green_color) + '{color}{name:^{length}}{space}'.format(name=names[1], length=min_leng+2, space=' '*5, color=red_color) + '{color}{name:^{length}}{space}'.format(name=names[2], length=min_leng+2, space=' '*5, color=green_color))
 	print('{box_color}┌{line}┐{white}{space}'.format(line='─'*min_leng, space=' '*5, box_color=box, white=white_color)*3)
 	if len(data) == 0:
@@ -379,27 +352,22 @@ def print_boxs(data):
 				cnt += 1
 	print('{box_color}└{line}┘{white}{space}'.format(line='─'*min_leng, space=' '*5, box_color=box, white=white_color)*3)
 
-# Get input from user
-# inp = get_inp()
-# p = inp[0]
-# a = inp[1]
-# b = inp[2]
 
+def checkPath():
+	if(not os.path.exists(PATH)):
+		os.mkdir(PATH)
+		print("Creating Directory")
+		file = open(PATH + "/output.txt", "x")
+	else:
+		print("Directory already exists")
+		if(os.path.exists(PATH + "/output.txt")):
+			print("File already exists")
+		else:
+			print("Creating file")
+			file = open(PATH + "/output.txt", "x")
+	clear()
 
-
-# testCurve = EllipticCurve(79, 3, 2)
-# # point = testCurve.return_random_points(1)[0]
-# print(f'Is point {point} on curve? {testCurve.check_point(point)}')
-
-# new_point = point
-# for i in range(0,10):
-# 	new_point = testCurve.addition(new_point, new_point)
-# 	print(new_point)
-
-
-# print(testCurve.multiply(9, point[0]))
-# testCurve.generate_psuedo_random_nums(point[0][1], point[0], 5)
-
+	
 
 
 
@@ -407,79 +375,22 @@ def print_boxs(data):
 p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
 a = 0
 b = 7
+
 # Bitcoin generator point
 p1 = (55066263022277343669578718895168534326250603453777594175500187360389116729240, 32670510020758816978083085130507043184471273380659243275938904335757337482424)
 
 
 testCurve = EllipticCurve(p, a, b)
 
+checkPath()
 
 
-# new_point = p1
-# for i in range(0,1000):
-# 	new_point = testCurve.addition(new_point, new_point)
-# 	print(new_point)
-# 	print(f"Is point {new_point} on curve? {testCurve.check_point(new_point)}")
+# clear()
+# print_Inp(p, a, b)
+# print_general_exchange()
+testCurve.generate_psuedo_random_nums(random.randint(0, p1[0]), p1, 10000)
 
-
-
-# testCurve.generate_psuedo_random_nums(random.randint(0, p1[0]), p1, 10000)
-
-clear()
-print_Inp(p, a, b)
-print_general_exchange()
-
-
-
-
-
-
-
-
-
-
-# Bitcoin values
-# p = 115792089237316195423570985008687907853269984665640564039457584007908834671663
-# a = 0
-# b = 7
-# # Bitcoin generator point
-# p1 = (55066263022277343669578718895168534326250603453777594175500187360389116729240, 32670510020758816978083085130507043184471273380659243275938904335757337482424)
-
-
-# p = 7
-# a = 3
-# b = 2
-
-# p1 = (2, 3)
-# p2 = (4, 6)
-
-# testCurve = EllipticCurve(p, a, b)
-
-# print(testCurve.return_random_points(2))
-
-# p1 = (55, 22) # true
-# print(testCurve.check_point(p1))
-# p1 = (53, 53) # true
-# print(testCurve.check_point(p1))
-# p1 = (53, 26) # true
-# print(testCurve.check_point(p1))
-# p1 = (54, 22) # false
-# print(testCurve.check_point(p1))
-# p1 = (32, 9) # true
-# print(testCurve.check_point(p1))
-# p1 = (17, 22) # false
-# print(testCurve.check_point(p1))
-
-
-
-# print(testCurve.addition(p1, p2))
-# print(testCurve.check_point(p2))
-
-
-
-
-
-
+monobitTest()
 
 
 
