@@ -1,8 +1,20 @@
 
 from sympy import *
+from sympy import gcd as sm
+from sympy import simplify as simp
+from sympy import solve as sol
 import matplotlib.pyplot as plt
 import numpy as np
+import collections
+
 from sage.all import *
+import sage.categories.all
+
+from sage.categories.category_singleton import Category_singleton
+from sage.misc.abstract_method import abstract_method
+from sage.categories.fields import Fields
+
+from sage.structure.element import coerce_binop
 
 
 
@@ -23,6 +35,8 @@ class HyperEllipticCurve:
 
         print(self.eq)
 
+    def get_eq(self):
+        return self.eq
     def reduce_mod_p(self, num):
         return (num % self.p)
 
@@ -69,8 +83,113 @@ class HyperEllipticCurve:
 
         return new_coeffs
 
+    def sage_cantor(self, d1, d2, eq, p_val):
+        R = sage.all.PolynomialRing(GF(Integer(p_val)), names=('x',)); (x,) = R._first_ngens(1)
+        D3 = sage.schemes.hyperelliptic_curves.jacobian_morphism.cantor_composition_simple(d1, d2, eq, Integer(2))
+        D3_reduced = sage.schemes.hyperelliptic_curves.jacobian_morphism.cantor_reduction_simple(D3[0], D3[1], eq, 2)
+        return D3_reduced
 
-    def cantors_algorithm(self, divisors):
+    def pseudo_random_nums(self, D3):
+        u = D3[0]
+        v = D3[1]
+        roots = []
+        
+        roots.append(u.roots()[0][0])
+        roots.append(u.roots()[1][0])
+        random_num = v(x=roots[1])
+        return random_num
+
+    def fix_new_points(self, point_list):
+        D1 = []
+        D2 = []
+        x1, y1 = point_list[0]
+        x2, y2 = point_list[1]
+        x3, y3 = point_list[2]
+        x4, y4 = point_list[3]
+
+        x1 = int(x1/2)
+        x2 = int(x2-73)
+        x3 = int(x3/3)
+        x4 = int(x4-81)
+
+        y1 = self.get_eq().subs(x, x1) % self.p
+        y2 = self.get_eq().subs(x, x2) % self.p
+        y3 = self.get_eq().subs(x, x3) % self.p
+        y4 = self.get_eq().subs(x, x4) % self.p
+
+        D1.append([x1, y1])
+        D1.append([x2, y2])
+        D2.append([x3, y3])
+        D2.append([x4, y4])
+
+        return [D1, D2] 
+
+    def compare_points(self, point_list):
+
+        counter_list = []
+        for i in range (0, 4):
+
+            counter_list.append(collections.Counter(point_list[i]))
+        
+        match = False
+        for i in range (0, 4):
+            for j in range (0, 4):
+                if (counter_list[i] == counter_list[j]):
+                    match = True
+        return match
+
+    def mumford_rep(self, D1, D2):
+        divisors = [D1, D2]
+        
+        new_divisors = []
+        for i in divisors:
+            mum_rep = []
+            # print(i)
+
+            x, y, a, b = symbols("x y a b")
+
+            u = self.reduce_equation_mod_p(cancel((x-i[0][0])*(x-i[1][0])))
+            # print(u)
+
+            general_form = Eq(y, a*x + b)
+            general_expression = a*x + b
+
+            sub_1 = general_form.subs(y, i[0][1]).subs(x, i[0][0])
+            sub_2 = general_form.subs(y, i[1][1]).subs(x, i[1][0])
+
+            
+            # # print(general_form)
+
+            system_of_equations = []
+            
+            # # print(sub_1)
+            # # print(sub_2)
+            system_of_equations.append(sub_1)
+            system_of_equations.append(sub_2)
+            
+            
+            # print(system_of_equations)
+
+            solved = sol(system_of_equations)
+            
+            # print(solved)
+
+            a_val = self.reduce_mod_p(solved[a])
+            b_val = self.reduce_mod_p(solved[b])
+            # # print("A: " + str(a_val))
+            # # print("B: " + str(b_val))
+
+            v = general_expression.subs(a, a_val).subs(b, b_val)
+
+            # # print("v1: " + str(v1))
+            # print(f'In Mumford Form, {i} = [{u}, {v}]')
+            mum_rep.append(u)
+            mum_rep.append(v)
+            new_divisors.append(mum_rep)
+
+        return new_divisors
+
+    def cantors_algorithm(self, divisors, n, p_val):
         # print(divisors)
 
         divisor1 = divisors[0]
@@ -80,95 +199,92 @@ class HyperEllipticCurve:
         u2, v2 = divisor2
 
         e1, e2, c1, c2= symbols("e1 e2 c1 c2")
-
-        d1 = gcd(u1, u2)
+        need_num = False
+        
+        d1 = sm(u1, u2)
+        # print(d1)
         # print("E1, E2: " + str(solve(Eq(e1 * u1 + e2 * u2, d1), e1, e2)))
-        d = gcd(d1, v1 + v2)
+        d = sm(d1, v1 + v2)
 
-        u1 = self.reduce_equation_mod_p(u1)
-        u2 = self.reduce_equation_mod_p(u2)
+        x = Symbol('x')
+        u1_coeffs = poly(u1, x).all_coeffs()
+        u2_coeffs = poly(u2, x).all_coeffs()   
+        v1_coeffs = poly(v1, x).all_coeffs()
+        v2_coeffs = poly(v2, x).all_coeffs()  
+        d_coeffs = poly(d, x).all_coeffs()
+        eq_coeffs = poly(self.eq, x).all_coeffs()
 
-        d1 = self.reduce_mod_p(d1)
-        d = self.reduce_mod_p(d)
 
-        # print(f"gcd({u1}, {u2}): {d1}, gcd({d1}, {v1} + {v2}): {d}, u1: {u1}, u2: {u2}")
-        # print("C1, C2: " + str(solve(Eq(c1 * d1 + c2 *(v1 + v2), d), c1, c2)))
 
-        e_dict = solve(Eq(e1 * u1 + e2 * u2, d1), e1, e2)
-        print(e_dict)
-        e_dict = solve(Eq(e1 * u1 + e2 * u2, d1), e2, e1)
-        print(e_dict)
-
-        e1_val = solve((-e1*x**2 - 7*e1*x - 10*e1 + 1)/(x**2 + 10))[0][e1]
-        print(e1_val)
-
-        e2_val = solve((-e2*x**2 - 10*e2 + 1)/(x**2 + 7*x + 10))[0][e2]
-        print(e2_val)
+        v1v2 = v1+v2
         
-        # e1_val = 1/(2*u1)
-        # e2_val = 1/(2*u2)
-
-        # e1_eq = solve(Eq(e1 * u1 + e2 * u2, d1), e1, e2)
-        # print(e1_eq[0])
-        # print(solve((e1_eq[0])))
-
-
-        # print(solve((-e1*x**2 - 7*e1*x - 10*e1 + 1)/(x**2 + 10), e1))
-        # e_dict = solve(Eq(e1 * u1 + e2 * u2, d1), e1, e2)
-        c_dict = solve(Eq(c1 * d1 + c2 *(v1 + v2), d), c1, c2)
-
-       
-
-        # print(e_dict)
-        # print(c_dict)
-
-        # print(simplify(e_dict[0][0]))
-
-        # print(self.reduce_equation_mod_p(cancel(u1 * u2)))
-
-        # e1_val = e_dict[e1]
-        # e2_val = e_dict[e2]
-        c1_val = c_dict[c1]
-        c2_val = c_dict[c2]
+        v1v2_coeffs = poly(v1v2, x).all_coeffs()  
+        d1_coeffs = poly(d1, x).all_coeffs()
+        if len(d1_coeffs) == 1:
+            d1_coeffs.append(d1_coeffs[0])
+            d1_coeffs[0] = 0
 
         
+        
+        R = sage.all.PolynomialRing(GF(Integer(p_val)), names=('x',)); (x,) = R._first_ngens(1)
 
 
 
-        print(f"e1: {e1_val}, e2: {e2_val}, c1: {c1_val}, c2: {c2_val}")
+        u1 = int(u1_coeffs[0])*x**2+int(u1_coeffs[1])*x+int(u1_coeffs[2])
+        u2 = int(u2_coeffs[0])*x**2+int(u2_coeffs[1])*x+int(u2_coeffs[2])
+        if (len(v1_coeffs) == 1):    
+            v1 = int(v1_coeffs[0])
+        else:
+            v1 = int(v1_coeffs[0])*x+int(v1_coeffs[1])
+        if (len(v2_coeffs) == 1):    
+            v2 = int(v2_coeffs[0])
+        else:
+            v2 = int(v2_coeffs[0])*x+int(v2_coeffs[1])
+        
+        eq = eq_coeffs[0]*x**5 + eq_coeffs[1]*x**4 + eq_coeffs[2]*x**3 + eq_coeffs[3]*x**2 + eq_coeffs[4]*x + eq_coeffs[5]
 
-        s1 = (c1_val * e1_val)
-        s2 = (c1_val * e2_val)
-        s3 = c2_val
+        D1 = [u1, v1]
+        D2 = [u2, v2]
 
-        u = (u1 * u2) / d**2
-
-        # Need to find a way to call xgcd() from sage math
-
-
-        u = self.reduce_equation_mod_p(cancel(u))
-        print(u)
-        # v = simplify(self.reduce_modulo_poly((((s1*u1*v2)+(s2*u2*v1)+(s3*(v1*v2+(self.eq)))) / d), u))
-        v = div(self.reduce_equation_mod_p(s1*u1*v2+s2*u2*v1), u)[1]
-
-        print(v)
-        while(degree(u) > 2):
-
-            u_prime = u_prime = div((self.eq - simplify(cancel(v**2))), u)[0]
-            v_prime = (div(-1*v, u_prime)[1])
-
-            u = u_prime
-            v = v_prime
-
-        u = monic(u)
-
-        u = self.reduce_equation_mod_p(u)
-        v = self.reduce_equation_mod_p(v)
-        print("u3: " + str(u))
-        print("v3: " + str(v))
+        D3 = sage.schemes.hyperelliptic_curves.jacobian_morphism.cantor_composition_simple(D1, D2, eq, Integer(2))
+        D3_reduced = sage.schemes.hyperelliptic_curves.jacobian_morphism.cantor_reduction_simple(D3[0], D3[1], eq, 2)
 
 
+        d_arr = [D1, D2, D3]
 
+        for i in range (0, n):
+            temp_d2 = d_arr[i+2]
+            D3_reduced = self.sage_cantor(D1, temp_d2, eq, p_val)
+            if (i == n-1):
+                for j in range (0, n):
+                    D3_reduced = self.sage_cantor(temp_d2, D3_reduced, eq, p_val)
+                    temp_d2 = d_arr[j]
+                if (len(D3_reduced[0].roots()) > 1):
+                    d_arr.append(D3_reduced)
+                            
+                else:
+                    for i in range (0, 4):
+                        if (len(D3_reduced[1].coefficients()) == 1):
+                            random_num = D3_reduced[1].coefficients()[0]
+                        else:
+                            random_num = D3_reduced[1].coefficients()[1]
+                        need_num = True
+                        
+
+            d_arr.append(D3_reduced)
+            
+
+        length = len(d_arr) - 1
+        
+        new_x = []
+        for i in range (0, 4):
+            if (len(d_arr[length-(2*i)][1].coefficients()) == 1):
+                new_x.append(d_arr[length-(2*i)][1].coefficients()[0])
+            else:
+                new_x.append(d_arr[length-(2*i)][1].coefficients()[1])
+        if (need_num != True):
+            random_num = self.pseudo_random_nums(d_arr[-1])
+        return [random_num, new_x]
 
 p = 11
 c1 = 1
@@ -179,9 +295,23 @@ c5 = 1
 c6 = 2
 
 x = Symbol("x")
-
+p_val = 115792089237316195423570985008687907853269984665640564039457584007908834671663
 new_divisors = [[x**2 + 7*x + 10, x + 9], [x**2 + 10, 7*x + 9]]
+n = 30
+random_num = 0
 
 hec = HyperEllipticCurve(p, c1, c2, c3, c4, c5, c6)
-hec.cantors_algorithm(new_divisors)
+for i in range(0, 100):
+    print(hec.cantors_algorithm(new_divisors, n, p_val)[0])
+
+    new_points = []
+    for i in range (0, 4):
+        new_x = hec.cantors_algorithm(new_divisors, n, p_val)[1][i]
+        new_y = int(hec.get_eq().subs(x, new_x)) % p_val
+        new_points.append([new_x, new_y])
+    if (hec.compare_points(new_points) == True):
+        fixed_points = hec.fix_new_points(new_points)
+        new_divisors = hec.mumford_rep(fixed_points[0], fixed_points[1])
+    else:
+        new_divisors = hec.mumford_rep([new_points[0], new_points[1]], [new_points[2], new_points[3]])
 
