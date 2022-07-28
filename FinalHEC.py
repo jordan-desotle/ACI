@@ -1,3 +1,4 @@
+
 from sympy import *
 from sympy import gcd as sm
 from sympy import simplify as simp
@@ -275,7 +276,7 @@ class HyperEllipticCurve:
                 
             if (i == n-1):
                 if (len(two_root_divs) < 2):
-                    for j in range (0, len(two_root_divs)):
+                    for j in range (0, (2 - len(two_root_divs))):
                         two_root_divs.append(all_two_root_divs[-j])
                         
                     print("in function: " + str(two_root_divs))
@@ -371,3 +372,4 @@ file = open(FILE, "w")
 for i in random_nums:
     # file.write(bin(i).replace("0b", "") + "\n")
     file.write(str(i) + "\n")
+
