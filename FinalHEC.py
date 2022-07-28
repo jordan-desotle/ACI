@@ -1,4 +1,3 @@
-
 from sympy import *
 from sympy import gcd as sm
 from sympy import simplify as simp
@@ -275,6 +274,11 @@ class HyperEllipticCurve:
                 two_root_divs.append(D3_reduced)
                 
             if (i == n-1):
+                if (len(two_root_divs) < 2):
+                    for j in range (0, len(two_root_divs)):
+                        two_root_divs.append(all_two_root_divs[-j])
+                        
+                    print("in function: " + str(two_root_divs))
                 if (len(D3_reduced[0].roots()) < 2):
                     for j in range (0, n):
                         temp_d2 = d_arr[j]
@@ -315,7 +319,7 @@ class HyperEllipticCurve:
             new_points.append(self.solve_for_new_points(x1, x2, v3_coeffs))
         if (need_num == True):
             random_num = self.pseudo_random_nums(two_root_divs[1])
-        return [random_num, new_points]
+        return [random_num, new_points, two_root_divs]
 
 p = 11
 c1 = 1
@@ -338,6 +342,7 @@ p_val = 237512715131811281324243117391942323623 #trial 3
 new_divisors = [[x**2 + 7*x + 10, x + 9], [x**2 + 10, 7*x + 9]]
 n = 100
 random_num = 0
+all_two_root_divs = []
 
 hec = HyperEllipticCurve(p, c1, c2, c3, c4, c5, c6)
 for i in range(0, 200):
@@ -358,6 +363,9 @@ for i in range(0, 200):
         new_divisors = hec.mumford_rep(new_D1, new_D2)
     print(str(i+1) + ": " + str(new_num))
     random_nums.append(new_num)
+    for j in hec.cantors_algorithm(new_divisors, n, p_val)[2]:
+        all_two_root_divs.append(j)
+        
 
 file = open(FILE, "w")
 for i in random_nums:
